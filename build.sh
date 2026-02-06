@@ -2,6 +2,8 @@
 as --32 src/boot/boot.s -o boot.o
 gcc -m32 -ffreestanding -c src/kernel/kernel.c -o kernel.o
 ld -m elf_i386 -T linker.ld -o flux-kernel boot.o kernel.o
+
+# Check for Multiboot 1 (not 2)
 grub-file --is-x86-multiboot flux-kernel
 
 if [ $? -ne 0 ]; then
