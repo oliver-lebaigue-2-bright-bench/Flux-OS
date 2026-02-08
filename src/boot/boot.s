@@ -20,10 +20,23 @@ stack_top:
 .type _start, @function
 
 _start:
+  # Disable interrupts
+  cli
+  
+  # Set up stack - stack grows downward, so top is the highest address
   mov $stack_top, %esp
+  
+  # Push multiboot info pointer (in EBX) as argument
+  # stdcall/cdecl: arguments pushed right-to-left
+  push %ebx
+  
+  # Call C kernel_main
   call kernel_main
+  
+  # Kernel shouldn't return, but if it does, halt
   cli
 hang:
   hlt
   jmp hang
+
 .size _start, . - _start
