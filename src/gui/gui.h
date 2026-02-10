@@ -203,7 +203,10 @@ int gui_poll_event(event_t* event);
 void mouse_init();
 void mouse_handle_packet(uint8_t byte0, uint8_t byte1, uint8_t byte2);
 void mouse_enable_streaming();
+void mouse_disable();
 void mouse_get_position(int* x, int* y);
+void mouse_set_position(int x, int y);
+void enable_mouse();
 
 // Keyboard input
 void keyboard_init();

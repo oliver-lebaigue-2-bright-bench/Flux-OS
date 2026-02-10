@@ -1,14 +1,26 @@
 #!/bin/bash
 
 # Build GUI sources first
-echo "Building GUI sources..."
+echo "Building Flux-OS..."
 
 # Bootloader assembly
 as --32 src/boot/boot.s -o boot.o
 
+# libc compatibility layer (must come first)
+gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
+    -I src/kernel -I src/graphics -I src/gui \
+    -c src/libc_compat.c -o libc_compat.o 2>&1
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: libc_compat.c compilation failed."
+    exit 1
+fi
+
+echo "Built libc_compat.c"
+
 # Kernel compilation - freestanding, no standard headers
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/graphics -I src/gui \
+    -I src/graphics -I src/gui -I src/kernel \
     -c src/kernel/kernel.c -o kernel.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -16,9 +28,11 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo "Built kernel.c"
+
 # Graphics compilation
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/graphics -I src/gui \
+    -I src/graphics -I src/gui -I src/kernel \
     -c src/graphics/gfx.c -o gfx.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -26,10 +40,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo "Built gfx.c"
+
 # GUI compilation - freestanding environment
 echo "Compiling GUI..."
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/gui -I src/graphics \
+    -I src/gui -I src/graphics -I src/kernel \
     -c src/gui/desktop.c -o gui_desktop.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -38,7 +54,7 @@ if [ $? -ne 0 ]; then
 fi
 
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/gui -I src/graphics \
+    -I src/gui -I src/graphics -I src/kernel \
     -c src/gui/mouse.c -o gui_mouse.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -47,7 +63,7 @@ if [ $? -ne 0 ]; then
 fi
 
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/gui -I src/graphics \
+    -I src/gui -I src/graphics -I src/kernel \
     -c src/gui/keyboard.c -o gui_keyboard.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -56,7 +72,7 @@ if [ $? -ne 0 ]; then
 fi
 
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/gui -I src/graphics \
+    -I src/gui -I src/graphics -I src/kernel \
     -c src/gui/window.c -o gui_window.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -65,7 +81,7 @@ if [ $? -ne 0 ]; then
 fi
 
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/gui -I src/graphics \
+    -I src/gui -I src/graphics -I src/kernel \
     -c src/gui/button.c -o gui_button.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -74,7 +90,7 @@ if [ $? -ne 0 ]; then
 fi
 
 gcc -m32 -ffreestanding -fno-stack-protector -fno-pie \
-    -I src/gui -I src/graphics \
+    -I src/gui -I src/graphics -I src/kernel \
     -c src/gui/string.c -o gui_string.o 2>&1
 
 if [ $? -ne 0 ]; then
@@ -82,14 +98,28 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo "GUI components built"
+
 # Linking
 echo "Linking..."
-ld -m elf_i386 -T linker.ld -o flux-kernel boot.o kernel.o gfx.o gui_desktop.o gui_mouse.o gui_keyboard.o gui_window.o gui_button.o gui_string.o 2>&1
+ld -m elf_i386 -T linker.ld -o flux-kernel \
+    boot.o \
+    kernel.o \
+    gfx.o \
+    gui_desktop.o \
+    gui_mouse.o \
+    gui_keyboard.o \
+    gui_window.o \
+    gui_button.o \
+    gui_string.o \
+    libc_compat.o 2>&1
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Linking failed."
     exit 1
 fi
+
+echo "Linking complete"
 
 # Check for Multiboot 1 (not 2)
 echo "Checking Multiboot compliance..."
@@ -119,6 +149,7 @@ menuentry "Flux-OS" {
 }
 CFGEOF
 
+echo "Creating ISO..."
 grub-mkrescue -o flux-os.iso isodir 2>&1
 
 if [ $? -ne 0 ]; then
@@ -126,11 +157,19 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo "ISO created: flux-os.iso"
+
 # Clean up object files
-rm -f boot.o kernel.o gfx.o gui_desktop.o gui_mouse.o gui_keyboard.o gui_window.o gui_button.o gui_string.o
+rm -f boot.o kernel.o gfx.o gui_desktop.o gui_mouse.o gui_keyboard.o gui_window.o gui_button.o gui_string.o libc_compat.o
 
 echo ""
 echo "========================================"
-echo "Build Complete! Run with: ./run_qemu.sh"
+echo "Build Complete! Run with: ./run_gui.sh"
 echo "========================================"
+echo ""
+echo "Troubleshooting:"
+echo "- If GUI doesn't appear, run: ./run_qemu.sh"
+echo "- Check QEMU window for text output"
+echo "- Ensure QEMU is compiled with SDL support"
+echo ""
 

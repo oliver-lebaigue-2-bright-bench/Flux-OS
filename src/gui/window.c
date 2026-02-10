@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "../libc_compat.h"
 
 // Hit test return values
 #define HTCAPTION      0x02

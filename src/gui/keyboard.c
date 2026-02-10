@@ -238,8 +238,9 @@ void keyboard_init() {
     g_keyboard_ctrl = 0;
     g_keyboard_alt = 0;
     
-    // Clear keyboard buffer
-    while (inb(KEYBOARD_STATUS_PORT) & KEYBOARD_STATUS_OUT_BUFFER) {
+    // Clear keyboard buffer - read all pending scancodes
+    int timeout = 10000;
+    while (timeout-- && (inb(KEYBOARD_STATUS_PORT) & KEYBOARD_STATUS_OUT_BUFFER)) {
         inb(KEYBOARD_DATA_PORT);
     }
 }

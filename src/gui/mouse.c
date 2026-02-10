@@ -1,5 +1,6 @@
 #include "gui.h"
 #include "gfx.h"
+#include "../libc_compat.h"
 
 // PS/2 Mouse Controller ports
 #define MOUSE_DATA_PORT    0x60

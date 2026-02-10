@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "../libc_compat.h"
 
 // Forward declarations
 static void button_widget_draw(widget_t* widget);
