@@ -1,5 +1,6 @@
 # FLUX-OS
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/974f59cd-c1bb-4972-8260-6917b9bb6685/deploy-status)](https://app.netlify.com/projects/flux-os/deploys)
 ![Version](https://img.shields.io/badge/version-2.3--pre--alpha-orange)
 ![Language](https://img.shields.io/badge/language-C%20%2B%20Assembly-blue)
 ![Status](https://img.shields.io/badge/status-Text--Mode-red)
