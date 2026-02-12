@@ -224,11 +224,22 @@ void kernel_main(uint32_t mb_info, uint32_t mb_magic) {
     serial_write(info);
     serial_write("\n");
     
+    serial_write("Frame buffer address: ");
+    serial_write_hex(fb_addr);
+    serial_write("\n");
+    
+    serial_write("Graphics mode: ");
+    serial_write_hex(graphics_mode);
+    serial_write("\n");
+    
     vga_write_text("Initializing GUI...", 10, 0x0A);
     serial_write("Initializing GUI...\n");
     
     // Initialize GUI
     gui_init(screen_width, screen_height, framebuffer, pitch);
+    
+    serial_write("GUI init returned, checking state...\n");
+    
     gui_create_desktop();
     
     vga_write_text("GUI Running! Press ESC.", 12, 0x0A);

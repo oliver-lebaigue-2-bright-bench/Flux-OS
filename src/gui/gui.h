@@ -207,6 +207,7 @@ void mouse_disable();
 void mouse_get_position(int* x, int* y);
 void mouse_set_position(int x, int y);
 void enable_mouse();
+void mouse_interrupt_handler();
 
 // Keyboard input
 void keyboard_init();

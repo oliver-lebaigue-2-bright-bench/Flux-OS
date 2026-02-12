@@ -67,9 +67,21 @@ void gui_init(int width, int height, void* fb, int pitch) {
     // Enable mouse
     enable_mouse();
     
-    // Clear VGA buffer
+    // Clear VGA buffer for debug messages
     gui_vga_clear();
     vga_write("GUI Initialized", 0x0A);
+    
+    // Verify framebuffer is accessible
+    if (!fb) {
+        vga_write("\nFramebuffer NULL!", 0x0C);
+        gui.initialized = 0;
+        return;
+    }
+    
+    // Clear framebuffer with background color
+    clear_screen(GUI_COLOR_DESKTOP);
+    
+    vga_write("\nFramebuffer OK", 0x0A);
 }
 
 // VGA helper functions
