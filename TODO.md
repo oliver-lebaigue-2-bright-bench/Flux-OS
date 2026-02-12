@@ -1,50 +1,68 @@
-# Flux-OS WIMP GUI Implementation Plan
+# FLUX-OS Development Todo List
 
-## Phase 1: GUI Foundation ✓
-- [x] Create src/gui directory structure
-- [x] Create gui.h with all type definitions
-- [x] Create mouse.c with PS/2 mouse driver
-- [x] Create keyboard.c with keyboard input handler
+## 📋 Current Status: Version 2.6 Pre-Alpha
 
-## Phase 2: Window System ✓
-- [x] Create window.c with window management
-- [x] Create button.c with clickable buttons
-- [x] Create string.c with freestanding string functions
+---
 
-## Phase 3: Desktop Environment ✓
-- [x] Create desktop.c with taskbar and clock
-- [x] Integrate GUI into kernel.c
+## 🎯 Active Tasks
 
-## Phase 4: Build Integration ✓
-- [x] Update build.sh to compile new GUI sources
-- [x] Test compilation - SUCCESS
-- [x] Build ISO image
+### Phase 3: Graphics System (In Progress)
+- [ ] VESA BIOS Extensions (VBE) Driver
+- [ ] Framebuffer Memory Mapping
+- [ ] Software Rendering Library (GFX)
+  - [ ] Font rendering system (Nothing OS typography)
+  - [ ] Dot-matrix display primitives
+  - [ ] Glyph interface elements
 
-## Build & Run Commands
-```bash
-# Build the OS with GUI
-bash build.sh
+### Phase 4: User Interface (Planned)
+- [ ] Desktop Environment (FluxWM)
+  - [ ] Nothing OS-inspired monochrome theme
+  - [ ] Glyph-based system indicators
+  - [ ] Dot-matrix clock and widgets
+  - [ ] Typography-driven window decorations
+  - [ ] Minimalist taskbar
+- [ ] Window Management
+- [ ] System Tray
 
-# Run in QEMU
-bash run_qemu.sh
-```
+---
 
-## Features Implemented:
-- PS/2 mouse with relative movement tracking
-- Keyboard input system with scancode handling
-- Window creation, movement, resizing
-- Window title bars with close/minimize/maximize buttons
-- Desktop with taskbar and clock
-- Clickable buttons
-- Event-driven architecture
-- Mouse cursor rendering
+## 🔧 Bug Fixes (Priority)
 
-## GUI Architecture:
-- Event System: Mouse events, keyboard events, window events
-- Window Manager: Z-order, dragging, resizing, focus
-- Components: Desktop, taskbar, windows, buttons
-- Main Event Loop for GUI rendering
+### Critical
+- [ ] VBE Initialization Failure (NULL vbe_mode_info)
+- [ ] Framebuffer address retrieval from GRUB
 
-## Note:
-The GUI requires VBE/VESA graphics mode to work. If QEMU doesn't provide VBE 
-information through GRUB, the system will fall back to 800x600 framebuffer mode.
+### Minor
+- [ ] Memory Layout (1MB load address assumption)
+- [ ] IDT implementation for interrupts
+
+---
+
+## 📝 Documentation
+
+- [x] README.md updated
+- [x] VISION.md created (Nothing OS desktop vision)
+- [ ] GUI component documentation
+
+---
+
+## 🛠️ Build & Testing
+
+- [x] Basic build system working
+- [ ] VBE graphics mode display
+- [ ] GUI rendering verification
+
+---
+
+## 📦 Dependencies
+
+- GCC i386 cross-compiler
+- GRUB 2 bootloader
+- QEMU emulator
+- X11 display server
+
+---
+
+*Last Updated: Version 2.6 Pre-Alpha*
+*Status: Active Development - Testers Needed!*
+

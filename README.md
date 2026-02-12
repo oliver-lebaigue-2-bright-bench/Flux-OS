@@ -1,18 +1,35 @@
 # FLUX-OS
 
+![image](flux-logo.png)
+
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/974f59cd-c1bb-4972-8260-6917b9bb6685/deploy-status)](https://app.netlify.com/projects/flux-os/deploys)
 ![Version](https://img.shields.io/badge/version-2.3--pre--alpha-orange)
 ![Language](https://img.shields.io/badge/language-C%20%2B%20Assembly-blue)
 ![Status](https://img.shields.io/badge/status-Text--Mode-red)
 ![License](https://img.shields.io/badge/license-Proprietary-teal)
 
-**FLUX-OS** is a 32-bit, hobbyist operating system written from scratch in C and x86 Assembly. It aims to be a "Nothing OS" inspired desktop environment—minimalist, typography-driven, and philosophically bare metal.
+> ⚠️ **MASSIVE WORK IN PROGRESS** - This project is actively being developed and is far from complete. Breaking changes are expected. testers are **DESPERATELY NEEDED**!
+
+**FLUX-OS** is a 32-bit, hobbyist operating system written from scratch in C and x86 Assembly. It is a **desktop version of Nothing OS**—minimalist, typography-driven, and philosophically bare metal. Every element draws from Nothing's award-winning design language: glyph interfaces, dot-matrix displays, and monochrome aesthetics reimagined for the desktop.
+
+---
+
+## 📝 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [README.md](README.md) | This file - main project overview |
+| [VISION.md](VISION.md) | **Desktop Nothing OS Vision** - Complete design philosophy and roadmap |
+| [MIGRATION_PLAN.md](MIGRATION_PLAN.md) | **ARM Migration Plan** - Plans for x86 → ARM port (Pi 500, ARM laptops) |
+| [TODO.md](TODO.md) | Development todo list and progress tracking |
+| [LICENSE.md](LICENSE.md) | Proprietary license agreement |
 
 ---
 
 ## 🚀 Current Status
 
-**Version:** 2.3 Pre-Alpha  
+**Version:** 2.6 Pre-Alpha  
 **Kernel:** Operational  
 **Graphics:** Text Mode Only (VBE Pending)
 
@@ -49,13 +66,17 @@ The system boots successfully via GRUB into a protected-mode kernel. It currentl
 
 ## ✨ Vision
 
-To create a desktop experience that feels like a digital instrument cluster. No bloat. No clutter. Just raw interaction between user and machine.
+**FLUX-OS** is a desktop reimagining of Nothing OS—bringing the award-winning mobile experience to personal computers. Just as Nothing transformed Android into a typography-driven, monochrome masterpiece, Flux OS does the same for the desktop.
+
+> 📖 **For the complete design philosophy, typography system, and feature roadmap, see [VISION.md](VISION.md).**
 
 ### Design Philosophy
 
-1. **Minimalism over Convenience:** We prioritize raw code efficiency and resource speed over user hand-holding. The OS should feel like a tool for experts, not a toy for the masses.
-2. **Typography as UI:** The interface is driven by a custom bitmap font system. The screen is a canvas for text and geometry, not stock icons and heavy assets.
-3. **Bare Metal Truth:** FLUX-OS does not hide the hardware. It exposes the Multiboot memory maps, the framebuffer addresses, and the interrupt descriptor tables to the user (if they dare to look).
+1. **Typography as UI:** Custom bitmap fonts and text-first navigation—Nothing's signature approach
+2. **Glyph Interface:** Software-based notification rings and animated system indicators
+3. **Dot Matrix Heritage:** Clock widgets and retro-modern display elements
+4. **Monochrome Aesthetics:** Pure black/white with intentional accent colors
+5. **Functional Minimalism:** No bloat, no clutter—just raw interaction between user and machine
 
 ---
 
