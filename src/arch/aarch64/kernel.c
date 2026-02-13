@@ -1,6 +1,6 @@
 /*
  * Flux-OS AArch64 Kernel Entry Point
- * Raspberry Pi 3/4/500 support
+ * Raspberry Pi 3/4/500 support with full WIMP GUI
  */
 
 #include <stdint.h>
@@ -12,13 +12,16 @@
 #include "timer.h"
 #include "gic.h"
 #include "mmu.h"
+#include "input.h"
 
-/* Common GUI includes */
+/* Common GUI includes - gui is declared in gui.h and defined in desktop.c */
 #include "../../gui/gui.h"
+#include "../../graphics/gfx.h"
 
 /* Architecture-specific definitions */
-#define UART0_BASE       0xFE201000  /* PL011 UART */
-#define UART1_BASE       0xFE215000  /* Mini UART */
+/* Pi 3/4/500: UART0 at 0xFE201000 */
+/* Pi 5: UART0 at 0xFE201000 (same as Pi 4) */
+#define UART0_BASE       0xFE201000
 
 /* UART registers */
 #define UART_DR          0x00
@@ -32,8 +35,7 @@
 /* Framebuffer info from mailbox */
 fb_info_t fb_info = {0};
 
-/* Global GUI state */
-gui_system_t gui = {0};
+/* NOTE: gui_system_t gui is defined in desktop.c */
 
 /* UART output function */
 static void uart_putc(char c) {
@@ -75,12 +77,6 @@ static void delay(volatile uint32_t count) {
     }
 }
 
-/* Get board revision to detect Pi 500 */
-static uint32_t get_board_revision(void) {
-    /* Read from mailboxes - simplified */
-    return 0; /* TODO: Implement proper detection */
-}
-
 /* Initialize UART0 */
 static void uart_init(void) {
     volatile uint32_t *uart = (volatile uint32_t *)UART0_BASE;
@@ -99,6 +95,45 @@ static void uart_init(void) {
     uart[UART_CR >> 2] = (1 << 0) | (1 << 8) | (1 << 9);
 }
 
+/* ARM-specific GUI event loop */
+void gui_run(void);
+
+void gui_run(void) {
+    if (!gui.initialized) return;
+    
+    event_t event;
+    int last_mouse_x = gui.mouse.x;
+    int last_mouse_y = gui.mouse.y;
+    int last_buttons = 0;
+    
+    uart_write("Starting GUI event loop...\r\n");
+    
+    /* Main event loop */
+    while (gui.running) {
+        /* Poll for input events - in a real implementation, this would 
+         * be driven by interrupts from USB controller */
+        
+        /* For now, simulate some basic input or wait for USB */
+        
+        /* Small delay to prevent CPU spinning */
+        for (volatile int i = 0; i < 100000; i++) {
+            __asm__ volatile ("nop");
+        }
+        
+        /* Process queued events */
+        while (gui_poll_event(&event)) {
+            gui_handle_event(&event);
+        }
+        
+        /* Redraw if needed */
+        if (gui.needs_redraw && gui.framebuffer) {
+            gui_redraw_all();
+        }
+    }
+    
+    uart_write("GUI event loop exited\r\n");
+}
+
 /* Main kernel entry */
 void kernel_main(void) {
     uart_init();
@@ -106,13 +141,8 @@ void kernel_main(void) {
     uart_write("\r\n");
     uart_write("=======================================\r\n");
     uart_write("Flux-OS AArch64 for Raspberry Pi\r\n");
+    uart_write("WIMP GUI Edition\r\n");
     uart_write("=======================================\r\n");
-    
-    /* Get board revision */
-    uint32_t rev = get_board_revision();
-    uart_write("Board revision: ");
-    uart_write_hex(rev);
-    uart_write("\r\n");
     
     /* Initialize memory management unit */
     uart_write("Initializing MMU...\r\n");
@@ -130,32 +160,48 @@ void kernel_main(void) {
     uart_write("Requesting framebuffer...\r\n");
     if (mailbox_get_fb(&fb_info) == 0) {
         uart_write("Framebuffer allocated:\r\n");
-        uart_write("  Address: ");
-        uart_write_hex(fb_info.base);
+        uart_write("  Width: ");
+        uart_write_hex(fb_info.width);
         uart_write("\r\n");
-        uart_write("  Size: ");
-        uart_write_hex(fb_info.size);
+        uart_write("  Height: ");
+        uart_write_hex(fb_info.height);
+        uart_write("\r\n");
+        uart_write("  Pitch: ");
+        uart_write_hex(fb_info.pitch);
+        uart_write("\r\n");
+        uart_write("  Base: ");
+        uart_write_hex(fb_info.base);
         uart_write("\r\n");
     } else {
         uart_write("Failed to get framebuffer!\r\n");
+        /* Hang */
+        while (1) { __asm__ volatile ("wfi"); }
     }
+    
+    /* Initialize input system */
+    uart_write("Initializing input system...\r\n");
+    input_init(fb_info.width, fb_info.height);
     
     /* Initialize GUI with framebuffer */
     if (fb_info.base != 0) {
         uart_write("Initializing GUI...\r\n");
         gui_init(fb_info.width, fb_info.height, (void *)fb_info.base, fb_info.pitch);
-        gui_create_desktop();
+        
+        if (gui.initialized) {
+            uart_write("Creating desktop...\r\n");
+            gui_create_desktop();
+            
+            uart_write("Kernel initialized!\r\n");
+            uart_write("Starting GUI...\r\n");
+            
+            /* Run GUI */
+            gui_run();
+        } else {
+            uart_write("GUI initialization failed!\r\n");
+        }
     }
     
-    uart_write("Kernel initialized!\r\n");
-    
-    /* Run GUI */
-    if (gui.initialized) {
-        gui_run();
-    }
-    
-    /* Fallback: text output only */
-    uart_write("GUI not available, text mode only.\r\n");
+    uart_write("System halted.\r\n");
     
     /* Idle loop */
     while (1) {

@@ -7,18 +7,11 @@
 
 #include <stdint.h>
 
-/* Framebuffer info */
-typedef struct {
-    uint64_t base;
-    uint32_t size;
-    uint32_t width;
-    uint32_t height;
-    uint32_t pitch;
-    uint32_t depth;
-} fb_info_t;
+/* Include mailbox.h for fb_info_t definition */
+#include "mailbox.h"
 
 /* Initialize framebuffer */
-int fb_init(fb_info_t *fb);
+int fb_init(void);
 
 /* Get framebuffer info */
 void fb_get_info(fb_info_t *fb);

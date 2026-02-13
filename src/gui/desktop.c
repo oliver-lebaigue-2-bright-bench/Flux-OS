@@ -1,22 +1,20 @@
 #include "gui.h"
 #include "../graphics/gfx.h"
-#include "../libc_compat.h"
+
+// Note: Memory functions (malloc, free, etc.) are provided by libc_compat_arm.c
+// which is linked in during build
 
 // Global GUI system
 gui_system_t gui;
 
-// VGA text mode buffer
-static volatile uint16_t* vga_buffer = (volatile uint16_t*)0xB8000;
-static int vga_col = 0;
-static int vga_row = 0;
-
 // Forward declarations
-static void vga_putchar(char c, uint8_t color);
-static void gui_vga_clear();
-static void vga_write(const char* str, uint8_t color);
+static void gui_vga_clear(void);
 
 // Initialize GUI system
 void gui_init(int width, int height, void* fb, int pitch) {
+    // Initialize graphics with framebuffer
+    gfx_init(width, height, fb, pitch);
+    
     // Initialize state
     gui.initialized = 1;
     gui.width = width;
@@ -60,74 +58,11 @@ void gui_init(int width, int height, void* fb, int pitch) {
     gui.running = 1;
     gui.needs_redraw = 1;
     
-    // Initialize subsystems
+    // Initialize window system
     window_system_init();
-    keyboard_init();
     
-    // Enable mouse
-    enable_mouse();
-    
-    // Clear VGA buffer for debug messages
-    gui_vga_clear();
-    vga_write("GUI Initialized", 0x0A);
-    
-    // Verify framebuffer is accessible
-    if (!fb) {
-        vga_write("\nFramebuffer NULL!", 0x0C);
-        gui.initialized = 0;
-        return;
-    }
-    
-    // Clear framebuffer with background color
+    // Clear screen with background
     clear_screen(GUI_COLOR_DESKTOP);
-    
-    vga_write("\nFramebuffer OK", 0x0A);
-}
-
-// VGA helper functions
-static void vga_putchar(char c, uint8_t color) {
-    if (c == '\n') {
-        vga_row++;
-        vga_col = 0;
-        return;
-    }
-    if (c == '\r') {
-        vga_col = 0;
-        return;
-    }
-    if (vga_row >= 25) {
-        // Scroll
-        for (int r = 0; r < 24; r++) {
-            for (int c = 0; c < 80; c++) {
-                vga_buffer[r * 80 + c] = vga_buffer[(r + 1) * 80 + c];
-            }
-        }
-        for (int c = 0; c < 80; c++) {
-            vga_buffer[24 * 80 + c] = 0x0A20;
-        }
-        vga_row = 24;
-    }
-    vga_buffer[vga_row * 80 + vga_col] = (uint16_t)c | ((uint16_t)color << 8);
-    vga_col++;
-    if (vga_col >= 80) {
-        vga_col = 0;
-        vga_row++;
-    }
-}
-
-
-static void gui_vga_clear() {
-    for (int i = 0; i < 80 * 25; i++) {
-        vga_buffer[i] = 0x0A20;
-    }
-    vga_col = 0;
-    vga_row = 0;
-}
-
-static void vga_write(const char* str, uint8_t color) {
-    while (*str) {
-        vga_putchar(*str++, color);
-    }
 }
 
 // Shutdown GUI
@@ -160,17 +95,57 @@ void gui_handle_event(event_t* event) {
     if (!event) return;
     
     switch (event->type) {
-        case EVENT_MOUSE_MOVE:
-        case EVENT_MOUSE_DOWN:
-        case EVENT_MOUSE_UP:
-        case EVENT_MOUSE_CLICK:
-            // Could update cursor position on screen
+        case EVENT_MOUSE_MOVE: {
+            // Update mouse position
+            gui.mouse.x = event->mouse_x;
+            gui.mouse.y = event->mouse_y;
+            // Find window under cursor and route event
+            window_t* win = window_at(event->mouse_x, event->mouse_y);
+            if (win) {
+                window_handle_event(win, event);
+            }
             break;
-            
-        case EVENT_KEY_DOWN:
-        case EVENT_KEY_UP:
+        }
+        case EVENT_MOUSE_DOWN: {
+            gui.mouse.buttons |= (1 << event->mouse_button);
+            // Bring window to front if clicked
+            window_t* win = window_at(event->mouse_x, event->mouse_y);
+            if (win) {
+                window_bring_to_front(win);
+                window_handle_event(win, event);
+            }
             break;
+        }
+        case EVENT_MOUSE_UP: {
+            gui.mouse.buttons &= ~(1 << event->mouse_button);
+            window_t* win = window_at(event->mouse_x, event->mouse_y);
+            if (win) {
+                window_handle_event(win, event);
+            }
+            break;
+        }
+        case EVENT_MOUSE_CLICK: {
+            window_t* win = window_at(event->mouse_x, event->mouse_y);
+            if (win && win->on_click) {
+                win->on_click(win, event->mouse_x, event->mouse_y);
+            }
+            break;
+        }
+        case EVENT_KEY_DOWN: {
+            gui.keyboard.scancode = event->key_code;
+            gui.keyboard.key = event->key_code;
+            gui.keyboard.pressed = 1;
             
+            // ESC to exit
+            if (event->key_code == 0x01) {  // ESC key
+                gui.running = 0;
+            }
+            break;
+        }
+        case EVENT_KEY_UP: {
+            gui.keyboard.pressed = 0;
+            break;
+        }
         case EVENT_REDRAW:
             gui.needs_redraw = 1;
             break;
@@ -180,7 +155,116 @@ void gui_handle_event(event_t* event) {
     }
 }
 
-// Port I/O helpers
+// Get time string
+void gui_get_time_string(char* buffer, size_t size) {
+    snprintf(buffer, size, "12:00");
+}
+
+// Redraw entire GUI
+void gui_redraw_all() {
+    if (!gui.framebuffer) return;
+    
+    // Draw desktop background - gradient effect
+    for (int y = 0; y < gui.height - gui.taskbar_height; y++) {
+        // Create a subtle gradient from top to bottom
+        uint8_t r = 0x0d + (y * 3 / 100);
+        uint8_t g = 0x3d + (y * 3 / 100);
+        uint8_t b = 0x52 + (y * 2 / 100);
+        uint32_t color = 0xFF000000 | (r << 16) | (g << 8) | b;
+        
+        uint32_t* row = (uint32_t*)((uint8_t*)gui.framebuffer + y * gui.pitch);
+        for (int x = 0; x < gui.width; x++) {
+            row[x] = color;
+        }
+    }
+    
+    // Draw windows
+    windows_draw_all();
+    
+    // Draw taskbar
+    int y = gui.height - gui.taskbar_height;
+    fill_rect(0, y, gui.width, gui.taskbar_height, GUI_COLOR_TASKBAR);
+    draw_line(0, y, gui.width, y, GUI_COLOR_LIGHT_GRAY);
+    
+    // Draw start button with gradient
+    fill_rect(5, y + 4, 70, 24, GUI_COLOR_BUTTON);
+    draw_rect(5, y + 4, 70, 24, GUI_COLOR_BORDER);
+    draw_string(13, y + 10, "Start", GUI_COLOR_BLACK, GUI_COLOR_BUTTON);
+    
+    // Draw clock area
+    char time_str[16];
+    gui_get_time_string(time_str, sizeof(time_str));
+    draw_string(gui.width - 70, y + 10, time_str, GUI_COLOR_WHITE, GUI_COLOR_TASKBAR);
+    
+    gui.needs_redraw = 0;
+}
+
+void widget_draw(widget_t* widget) {
+    if (!widget) return;
+    if (widget->draw) {
+        widget->draw(widget);
+    }
+}
+
+void widget_destroy(widget_t* widget) {
+    if (!widget) return;
+    if (widget->next) {
+        widget_destroy(widget->next);
+    }
+    free(widget);
+}
+
+void gui_update_clock() {
+    if (!gui.framebuffer) return;
+}
+
+void gui_create_desktop() {
+    // Create welcome window - centered on screen
+    window_t* welcome = window_create(
+        gui.width / 2 - 200,
+        gui.height / 2 - 180,
+        400,
+        320,
+        "Welcome to Flux-OS"
+    );
+    welcome->flags = WINDOW_FLAG_HAS_CLOSE | WINDOW_FLAG_HAS_MINIMIZE | WINDOW_FLAG_HAS_MAXIMIZE;
+    welcome->bg_color = GUI_COLOR_WINDOW_BG;
+    
+    // Draw welcome content directly on window
+    // (In a full implementation, this would be handled by window content widgets)
+    
+    // Create about window
+    window_t* about = window_create(
+        gui.width / 2 - 150,
+        gui.height / 2 - 50,
+        300,
+        150,
+        "About Flux-OS"
+    );
+    about->flags = WINDOW_FLAG_HAS_CLOSE;
+    about->bg_color = GUI_COLOR_WINDOW_BG;
+    
+    // Request initial redraw
+    gui.needs_redraw = 1;
+}
+
+void gui_register_shortcut(int key, int ctrl, void (*callback)()) {
+    (void)key;
+    (void)ctrl;
+    (void)callback;
+}
+
+void gui_set_mouse_position(int x, int y) {
+    gui.mouse.x = x;
+    gui.mouse.y = y;
+}
+
+// gui_run is defined separately for x86 and ARM
+// For ARM, we provide a simpler event loop that can be called from kernel.c
+#ifndef __aarch64__
+#include <stdint.h>
+
+// Port I/O helpers for x86
 static inline uint8_t port_inb(uint16_t port) {
     uint8_t ret;
     __asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));
@@ -200,7 +284,7 @@ static int last_mouse_buttons = 0;
 static int g_mouse_packet_byte = 0;
 static uint8_t g_mouse_packet[3] = {0};
 
-// Main GUI loop
+// Main GUI loop (x86 version)
 void gui_run() {
     if (!gui.initialized) return;
 
@@ -213,10 +297,6 @@ void gui_run() {
     for (int i = 0; i < 256; i++) {
         port_inb(KEYBOARD_DATA_PORT);
     }
-
-    // Initial message
-    vga_write("\nStarting GUI loop...\n", 0x0A);
-    vga_write("Press ESC to exit\n", 0x07);
 
     // Main event loop
     while (gui.running) {
@@ -232,12 +312,6 @@ void gui_run() {
             if (status & 0x01) {
                 uint8_t scancode = port_inb(KEYBOARD_DATA_PORT);
                 keyboard_handle_scancode(scancode);
-                
-                // ESC to exit
-                if ((scancode & 0x7F) == 0x01) {
-                    vga_write("\nGUI exiting...\n", 0x0C);
-                    gui.running = 0;
-                }
                 key_count++;
             } else {
                 break;
@@ -310,80 +384,5 @@ void gui_run() {
         }
     }
 }
+#endif // !__aarch64__
 
-// Get time string
-void gui_get_time_string(char* buffer, size_t size) {
-    snprintf(buffer, size, "12:00");
-}
-
-// Placeholder functions
-void gui_redraw_all() {
-    if (!gui.framebuffer) return;
-    
-    // Draw desktop background
-    fill_rect(0, 0, gui.width, gui.height - gui.taskbar_height, GUI_COLOR_DESKTOP);
-    
-    // Draw windows
-    windows_draw_all();
-    
-    // Draw taskbar
-    int y = gui.height - gui.taskbar_height;
-    fill_rect(0, y, gui.width, gui.taskbar_height, GUI_COLOR_TASKBAR);
-    draw_line(0, y, gui.width, y, GUI_COLOR_LIGHT_GRAY);
-    
-    // Draw simple start button
-    fill_rect(5, y + 4, 70, 24, GUI_COLOR_LIGHT_GRAY);
-    draw_rect(5, y + 4, 70, 24, GUI_COLOR_DARK_GRAY);
-    draw_string(13, y + 12, "Start", GUI_COLOR_BLACK, GUI_COLOR_LIGHT_GRAY);
-    
-    gui.needs_redraw = 0;
-}
-
-void widget_draw(widget_t* widget) {
-    if (!widget) return;
-    if (widget->draw) {
-        widget->draw(widget);
-    }
-}
-
-void widget_destroy(widget_t* widget) {
-    if (!widget) return;
-    if (widget->next) {
-        widget_destroy(widget->next);
-    }
-    free(widget);
-}
-
-void gui_update_clock() {
-    if (!gui.framebuffer) return;
-}
-
-void gui_create_desktop() {
-    // Create welcome window
-    window_t* welcome = window_create(
-        gui.width / 2 - 200,
-        gui.height / 2 - 150,
-        400,
-        300,
-        "Welcome to Flux-OS"
-    );
-    welcome->flags = WINDOW_FLAG_HAS_CLOSE | WINDOW_FLAG_HAS_MINIMIZE;
-    
-    // Create about window
-    window_t* about = window_create(
-        gui.width / 2 - 150,
-        gui.height / 2 - 100,
-        300,
-        200,
-        "About Flux-OS"
-    );
-    about->flags = WINDOW_FLAG_HAS_CLOSE | WINDOW_FLAG_HAS_MINIMIZE;
-}
-
-void gui_register_shortcut(int key, int ctrl, void (*callback)()) {
-}
-
-void gui_set_mouse_position(int x, int y) {
-    gui.mouse.x = x;
-    gui.mouse.y = y;
-}

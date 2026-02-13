@@ -9,12 +9,8 @@
 fb_info_t g_fb = {0};
 
 /* Initialize framebuffer */
-int fb_init(fb_info_t *fb) {
-    if (mailbox_get_fb(fb) == 0) {
-        g_fb = *fb;
-        return 0;
-    }
-    return -1;
+int fb_init(void) {
+    return mailbox_get_fb(&g_fb);
 }
 
 /* Get framebuffer info */

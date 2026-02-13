@@ -7,6 +7,22 @@ int screen_width = 0;
 int screen_height = 0;
 int pitch = 4096;  // Default pitch for 1024x768x32 (1024 pixels * 4 bytes)
 
+// Current mouse cursor position
+static int cursor_x = 0;
+static int cursor_y = 0;
+static int cursor_visible = 0;
+static uint32_t cursor_bg[16][16];  // Save background for cursor
+
+// Initialize graphics with framebuffer parameters (for ARM)
+void gfx_init(int width, int height, void* fb, int fb_pitch) {
+    screen_width = width;
+    screen_height = height;
+    framebuffer = (uint32_t*)fb;
+    pitch = fb_pitch;
+    cursor_x = width / 2;
+    cursor_y = height / 2;
+}
+
 // Simple 5x7 bitmap font for numbers and letters
 static const uint8_t font_data[256][7] = {
     [' '] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -223,4 +239,116 @@ void draw_taskbar(uint32_t color) {
     
     // Draw logo/text
     draw_string(5, taskbar_y + 8, "FLUX-OS", COLOR_WHITE, color);
+}
+
+// 16x16 arrow cursor bitmap
+static const uint8_t cursor_bitmap[16][4] = {
+    {0x80, 0x00, 0x00, 0x00},  // Row 0
+    {0xC0, 0x00, 0x00, 0x00},  // Row 1
+    {0xE0, 0x00, 0x00, 0x00},  // Row 2
+    {0xF0, 0x00, 0x00, 0x00},  // Row 3
+    {0xF8, 0x00, 0x00, 0x00},  // Row 4
+    {0xFC, 0x00, 0x00, 0x00},  // Row 5
+    {0xFE, 0x00, 0x00, 0x00},  // Row 6
+    {0xFF, 0x00, 0x00, 0x00},  // Row 7
+    {0xFC, 0x00, 0x00, 0x00},  // Row 8
+    {0xF8, 0x00, 0x00, 0x00},  // Row 9
+    {0xF0, 0x80, 0x00, 0x00},  // Row 10
+    {0xE0, 0xC0, 0x00, 0x00},  // Row 11
+    {0xC0, 0xE0, 0x00, 0x00},  // Row 12
+    {0x80, 0xF0, 0x00, 0x00},  // Row 13
+    {0x00, 0xF8, 0x00, 0x00},  // Row 14
+    {0x00, 0xF0, 0x80, 0x00},  // Row 15
+};
+
+// Mask for cursor (transparency)
+static const uint8_t cursor_mask[16][4] = {
+    {0x80, 0x00, 0x00, 0x00},
+    {0xC0, 0x00, 0x00, 0x00},
+    {0xE0, 0x00, 0x00, 0x00},
+    {0xF0, 0x00, 0x00, 0x00},
+    {0xF8, 0x00, 0x00, 0x00},
+    {0xFC, 0x00, 0x00, 0x00},
+    {0xFE, 0x00, 0x00, 0x00},
+    {0xFF, 0x00, 0x00, 0x00},
+    {0xFC, 0x00, 0x00, 0x00},
+    {0xF8, 0x00, 0x00, 0x00},
+    {0xF0, 0x80, 0x00, 0x00},
+    {0xE0, 0xC0, 0x00, 0x00},
+    {0xC0, 0xE0, 0x00, 0x00},
+    {0x80, 0xF0, 0x00, 0x00},
+    {0x00, 0xF8, 0x00, 0x00},
+    {0x00, 0xF0, 0x80, 0x00},
+};
+
+// Draw mouse cursor at position
+void draw_mouse_cursor(int x, int y) {
+    if (!framebuffer) return;
+    
+    // Save background first if visible
+    if (!cursor_visible) {
+        for (int py = 0; py < 16; py++) {
+            if (y + py >= 0 && y + py < screen_height) {
+                for (int px = 0; px < 16; px++) {
+                    if (x + px >= 0 && x + px < screen_width) {
+                        uint32_t* pixel = (uint32_t*)((uint8_t*)framebuffer + (y + py) * pitch) + (x + px);
+                        cursor_bg[py][px] = *pixel;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Draw cursor
+    for (int py = 0; py < 16; py++) {
+        if (y + py >= 0 && y + py < screen_height) {
+            for (int px = 0; px < 16; px++) {
+                if (x + px >= 0 && x + px < screen_width) {
+                    // Check mask bit
+                    int byte_idx = px / 8;
+                    int bit_idx = 7 - (px % 8);
+                    
+                    if (cursor_mask[py][byte_idx] & (1 << bit_idx)) {
+                        uint32_t* pixel = (uint32_t*)((uint8_t*)framebuffer + (y + py) * pitch) + (x + px);
+                        // Cursor color: white with black outline
+                        if (cursor_bitmap[py][byte_idx] & (1 << bit_idx)) {
+                            *pixel = COLOR_BLACK;
+                        } else {
+                            *pixel = COLOR_WHITE;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    cursor_x = x;
+    cursor_y = y;
+    cursor_visible = 1;
+}
+
+// Hide mouse cursor
+void hide_mouse_cursor(void) {
+    if (!framebuffer || !cursor_visible) return;
+    
+    // Restore background
+    for (int py = 0; py < 16; py++) {
+        if (cursor_y + py >= 0 && cursor_y + py < screen_height) {
+            for (int px = 0; px < 16; px++) {
+                if (cursor_x + px >= 0 && cursor_x + px < screen_width) {
+                    uint32_t* pixel = (uint32_t*)((uint8_t*)framebuffer + (cursor_y + py) * pitch) + (cursor_x + px);
+                    *pixel = cursor_bg[py][px];
+                }
+            }
+        }
+    }
+    
+    cursor_visible = 0;
+}
+
+// Show mouse cursor
+void show_mouse_cursor(void) {
+    if (framebuffer && !cursor_visible) {
+        draw_mouse_cursor(cursor_x, cursor_y);
+    }
 }

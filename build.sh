@@ -41,7 +41,7 @@ case "$ARCH" in
         CC="aarch64-linux-gnu-gcc"
         AS="aarch64-linux-gnu-as"
         LD="aarch64-linux-gnu-ld"
-        CFLAGS="-m64 -ffreestanding -fno-stack-protector -fno-pie -I src/arch/aarch64 -I src/gui"
+        CFLAGS="-march=armv8-a -ffreestanding -fno-stack-protector -fno-pie -I src/arch/aarch64 -I src/gui"
         ASFLAGS=""
         LDFLAGS=""
         LINKER_SCRIPT="linker_aarch64_pi.ld"
@@ -134,16 +134,24 @@ case "$ARCH" in
         $CC $CFLAGS -c src/arch/aarch64/timer.c -o timer.o 2>&1
         $CC $CFLAGS -c src/arch/aarch64/gic.c -o gic.o 2>&1
         $CC $CFLAGS -c src/arch/aarch64/mmu.c -o mmu.o 2>&1
+        $CC $CFLAGS -c src/arch/aarch64/input.c -o input.o 2>&1
+        
+        echo "Compiling libc compatibility..."
+        $CC $CFLAGS -c src/libc_compat_arm.c -o libc_compat.o 2>&1
+        
+        echo "Compiling graphics..."
+        $CC $CFLAGS -I src/graphics -I src/gui -c src/graphics/gfx.c -o gfx.o 2>&1
         
         echo "Compiling GUI..."
-        $CC $CFLAGS -I src/gui -c src/gui/desktop.c -o gui_desktop.o 2>&1
-        $CC $CFLAGS -I src/gui -c src/gui/mouse.c -o gui_mouse.o 2>&1
-        $CC $CFLAGS -I src/gui -c src/gui/keyboard.c -o gui_keyboard.o 2>&1
-        $CC $CFLAGS -I src/gui -c src/gui/window.c -o gui_window.o 2>&1
-        $CC $CFLAGS -I src/gui -c src/gui/button.c -o gui_button.o 2>&1
-        $CC $CFLAGS -I src/gui -c src/gui/string.c -o gui_string.o 2>&1
+        $CC $CFLAGS -I src/graphics -I src/gui -c src/gui/desktop.c -o gui_desktop.o 2>&1
+        # Skip mouse.c and keyboard.c for ARM - they have x86 inline asm
+        # $CC $CFLAGS -I src/graphics -I src/gui -c src/gui/mouse.c -o gui_mouse.o 2>&1
+        # $CC $CFLAGS -I src/graphics -I src/gui -c src/gui/keyboard.c -o gui_keyboard.o 2>&1
+        $CC $CFLAGS -I src/graphics -I src/gui -c src/gui/window.c -o gui_window.o 2>&1
+        $CC $CFLAGS -I src/graphics -I src/gui -c src/gui/button.c -o gui_button.o 2>&1
+        $CC $CFLAGS -I src/graphics -I src/gui -c src/gui/string.c -o gui_string.o 2>&1
         
-        OBJECTS="boot.o kernel.o mailbox.o fb.o timer.o gic.o mmu.o gui_desktop.o gui_mouse.o gui_keyboard.o gui_window.o gui_button.o gui_string.o"
+        OBJECTS="boot.o kernel.o mailbox.o fb.o timer.o gic.o mmu.o input.o libc_compat.o gfx.o gui_desktop.o gui_window.o gui_button.o gui_string.o"
         ;;
 esac
 
@@ -182,6 +190,24 @@ if [ -n "$BUILD_TYPE" ]; then
         --img)
             echo "Creating disk image..."
             cp flux-kernel ${KERNEL_NAME}
+            
+            # Pad kernel image to nearest 512 bytes (required for SD card burning)
+            CURRENT_SIZE=$(stat -c%s ${KERNEL_NAME})
+            REMINDER=$((CURRENT_SIZE % 512))
+            if [ $REMINDER -ne 0 ]; then
+                PADDED_SIZE=$(( (CURRENT_SIZE / 512 + 1) * 512 ))
+                truncate -s $PADDED_SIZE ${KERNEL_NAME}
+                echo "Padded ${KERNEL_NAME} from $CURRENT_SIZE to $PADDED_SIZE bytes"
+            fi
+            
+            # Copy config.txt for Raspberry Pi
+            if [ "$ARCH" = "aarch64" ]; then
+                if [ -f config.txt ]; then
+                    cp config.txt config.txt
+                    echo "Copied config.txt for Pi boot"
+                fi
+            fi
+
             echo "Created: ${KERNEL_NAME}"
             ;;
         --iso)

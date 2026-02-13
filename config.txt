@@ -1,0 +1,34 @@
+# Flux-OS Raspberry Pi Configuration
+# For Pi 3/4/500/5 (AArch64)
+
+# Force 64-bit mode
+arm_64bit=1
+
+# Set kernel filename
+kernel=kernel8.img
+
+# Skip OS support check (required for Pi 5)
+os_check=0
+
+# Enable USB (required for HID)
+dtparam=usb=on
+
+# Pi 5 specific
+dtparam=pciex1
+dtparam=nvme
+
+# Set framebuffer to a safe lower resolution
+framebuffer_width=1024
+framebuffer_height=768
+framebuffer_depth=32
+
+# Enable HDMI
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=4
+
+# Boot delay
+boot_delay=3
+
+# Disable Pi 5 specific device tree check (use generic)
+# dtoverlay=
