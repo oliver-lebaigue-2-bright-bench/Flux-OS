@@ -1,0 +1,10 @@
+[package]
+name = "flux-nothing-theme"
+version = "1.0.0"
+author = "Flux-OS Design Team"
+description = "Nothing (R) inspired minimalist theme for Orbital desktop environment"
+
+[metadata]
+theme_type = "orbital"
+min_orbital_version = "0.1.0"
+design_philosophy = "Minimalism, invisible technology, glyph-based UI"

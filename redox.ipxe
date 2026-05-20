@@ -1,5 +1,5 @@
 #!ipxe
-
-kernel bootloader-live.efi
-initrd http://${next-server}:8080/redox-live.iso
-boot
+echo Booting Flux-OS...
+echo Pure. Minimalist. Invisible.
+echo
+boot http://example.com/flux-os-latest.iso
