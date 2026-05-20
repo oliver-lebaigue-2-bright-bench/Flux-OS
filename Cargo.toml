@@ -1,15 +1,15 @@
 [package]
-name = "redox_cookbook"
+name = "flux_cookbook"
 version = "0.1.0"
-authors = ["Jeremy Soller <jackpot51@gmail.com>"]
+authors = ["Oliver Lebaigue <whiteo55@hwbcymru.net>"]
 edition = "2024"
 default-run = "repo"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "cookbook_redoxer"
-path = "src/bin/cookbook_redoxer.rs"
+name = "cookbook_fluxer"
+path = "src/bin/cookbook_fluxer.rs"
 
 [[bin]]
 name = "repo"
