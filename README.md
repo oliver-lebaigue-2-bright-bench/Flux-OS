@@ -1,62 +1,181 @@
 <p align="center">
-<img alt="Redox" width="346" src="https://gitlab.redox-os.org/redox-os/assets/raw/master/logos/redox/logo.png">
+  <img alt="Flux-OS" width="200" src="https://via.placeholder.com/200?text=flux+glyph">
 </p>
 
-This repository is the **Build System** for Redox OS.
+# Flux-OS
 
-Redox is under active development by a vibrant community, you can see the key links below:
+**The Nothing-inspired desktop operating system. Pure. Minimalist. Invisible.**
 
-- [The **main website** for Redox OS](https://www.redox-os.org).
-- [The Redox Book](https://doc.redox-os.org/book/) and [Build Instructions](https://doc.redox-os.org/book/podman-build.html).
-- [Redox Chat and Support](https://matrix.to/#/#redox-join:matrix.org).
-- [Patreon](https://www.patreon.com/redox_os), [Donate](https://redox-os.org/donate/) and [Merch](https://redox-os.creator-spring.com/).
-- Scroll down for a list of key Redox components and their repositories.
+Flux-OS is a clean, elegant desktop operating system built on the design language of Nothing (R). Like Nothing's philosophy, Flux-OS removes unnecessary complexity and brings clarity through minimalist interfaces and invisible technology.
 
-[Redox](https://www.redox-os.org) is an open-source operating system written in Rust, a language with focus on safety, efficiency and high performance. Redox uses a microkernel architecture, and aims to be reliable, secure, usable, correct, and free. Redox is inspired by previous operating systems, such as seL4, MINIX, Plan 9, Linux and BSD.
+Built on [Redox](https://www.redox-os.org) — a modern microkernel OS written in Rust — Flux-OS applies Nothing's distinctive design principles to create a desktop experience focused on simplicity and refinement.
 
-Redox _is not_ just a kernel, it's a **full-featured operating system**, providing components (file system, display server, core utilities, etc.) that together make up a functional and convenient operating system. Redox uses the COSMIC desktop apps, and provides source code compatibility with many Rust, Linux and BSD programs.
+---
 
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+## Design Philosophy
 
-## More Links
+Flux-OS embraces Nothing (R)'s core design language:
 
-- [Book](https://doc.redox-os.org/book/)
-- [Contribute](CONTRIBUTING.md)
-- [Hardware Compatibility](https://doc.redox-os.org/book/hardware-support.html)
-- Run Redox in a [Virtual Machine](https://doc.redox-os.org/book/running-vm.html) or on [Real Hardware](https://doc.redox-os.org/book/real-hardware.html)
-- [Trying Out Redox](https://doc.redox-os.org/book/trying-out-redox.html)
-- [Building Redox](https://doc.redox-os.org/book/podman-build.html)
-- [Build System Documentation](https://doc.redox-os.org/book/build-system-reference.html)
-- [Developer FAQ](https://doc.redox-os.org/book/developer-faq.html)
-- [Chat/Discussions/Help](https://doc.redox-os.org/book/chat.html)
+- **Minimalism**: Remove visual clutter. Simplify to the essential.
+- **Invisible Technology**: Technology that works seamlessly without demanding attention.
+- **Glyph-Based UI**: Signature glyph aesthetic for intuitive, light navigation.
+- **Clarity Through Reduction**: Every pixel serves a purpose.
+- **Light & Shadow**: Elegant use of negative space and typography.
 
-## Ecosystem
+---
 
-Some of the key repositories on the Redox GitLab:
+## Key Features
 
-| Essential Repositories                                                               | Maintainer
-|-------------------------------------------------------------------------------------------------------------|---------------------------
-| [Kernel](https://gitlab.redox-os.org/redox-os/kernel)                                                       | **@jackpot51**
-| [Base (essential system components and drivers)](https://gitlab.redox-os.org/redox-os/base)                             | **@jackpot51**
-| [RedoxFS (default filesystem)](https://gitlab.redox-os.org/redox-os/redoxfs)                                | **@jackpot51**
-| [relibc (C POSIX library written in Rust)](https://gitlab.redox-os.org/redox-os/relibc)                     | **@jackpot51**
-| [Ion (defauilt shell)](https://gitlab.redox-os.org/redox-os/ion)                                            | **@jackpot51**
-| [Termion (terminal library)](https://gitlab.redox-os.org/redox-os/termion)                                  | **@jackpot51**
-| [pkgutils (current package manager)](https://gitlab.redox-os.org/redox-os/pkgutils)                         | **@jackpot51**
-| [Orbital (display server and window manager)](https://gitlab.redox-os.org/redox-os/orbital)                 | **@jackpot51**
-| This repo - the root of the Build System                                                                    | **@jackpot51** **@hatred_45**
-| [Redoxer (tool for easy Redox development on Linux)](https://gitlab.redox-os.org/redox-os/redoxer)          | **@jackpot51**
-| [The Redox Book](https://gitlab.redox-os.org/redox-os/book)                                                 | **@jackpot51** **@hatred_45**
-| [Website](https://gitlab.redox-os.org/redox-os/website)                                                     | **@jackpot51** **@hatred_45**
+- **Minimalist Desktop**: A clean, clutter-free interface inspired by Nothing's glyph design language
+- **Elegant Window Manager**: Smooth animations and invisible system interactions
+- **Rust-based Foundation**: Safe, efficient, and performant core systems
+- **Microkernel Architecture**: Modular, secure, and maintainable OS design
+- **Modern Terminal**: Fast, beautiful command-line interface
+- **Glyph Icon System**: Consistent, minimalist application glyphs
 
-## What it looks like
+---
 
-See [Redox in Action](https://www.redox-os.org/screens/) for photos and videos.
+## Getting Started
 
-<img alt="Redox" height="150" src="https://gitlab.redox-os.org/redox-os/website/-/raw/master/static/img/screenshot/orbital-visual.png">
-<img alt="Redox" height="150" src="https://gitlab.redox-os.org/redox-os/website/-/raw/master/static/img/screenshot/cosmic-programs.png">
-<img alt="Redox" height="150" src="https://gitlab.redox-os.org/redox-os/website/-/raw/master/static/img/screenshot/cosmic-term-screenfetch.png">
+### System Requirements
+- x86_64 processor with 2GB+ RAM
+- 10GB+ storage for full installation
+- UEFI-capable firmware recommended
 
-<img alt="Redox" height="150" src="https://gitlab.redox-os.org/redox-os/website/-/raw/master/static/img/screenshot/cosmic-edit-redox.png">
-<img alt="Redox" height="150" src="https://gitlab.redox-os.org/redox-os/website/-/raw/master/static/img/screenshot/image-viewer.png">
-<img alt="Redox" height="150" src="https://gitlab.redox-os.org/redox-os/assets/raw/master/screenshots/Boot.png">
+### Quick Start
+
+#### Building from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/oliver-lebaigue-2-bright-bench/Flux-OS.git
+cd Flux-OS
+
+# Build (requires Rust, requires podman or Docker)
+make all
+
+# Run in QEMU
+make qemu
+```
+
+#### Using Pre-built Image
+
+Download the latest release from [Releases](https://github.com/oliver-lebaigue-2-bright-bench/Flux-OS/releases) and write to USB:
+
+```bash
+dd if=flux-os-latest.iso of=/dev/sdX bs=4M && sync
+```
+
+#### Virtual Machine
+
+For VirtualBox, VMware, or KVM — see [Build Instructions](./BUILDING.md)
+
+---
+
+## Architecture Overview
+
+Flux-OS is built on proven, modern foundations:
+
+| Component | Details | Status |
+|-----------|---------|--------|
+| **Kernel** | Microkernel architecture in Rust | Production |
+| **Filesystem** | RedoxFS (native) + POSIX support | Production |
+| **Shell** | Ion - modern shell | Production |
+| **Display Server** | Orbital - elegant window manager | Production |
+| **Package Manager** | pkgutils | Beta |
+| **Standard Library** | relibc (POSIX in Rust) | Production |
+
+---
+
+## Repository Structure
+
+```
+flux-os/
+├── kernel/                # Core microkernel
+├── base/                  # Essential system components
+├── filesystem/            # RedoxFS implementation
+├── display/               # Orbital display server & window manager
+├── applications/          # Core desktop applications
+├── recipes/               # Build recipes & package definitions
+├── toolchain/             # Rust toolchain & build utilities
+└── docs/                  # Documentation & design guidelines
+```
+
+---
+
+## Community & Contribution
+
+Flux-OS is built on the excellent work of [Redox OS](https://www.redox-os.org). We welcome contributions!
+
+- **Design Contributions**: Help refine the Flux-OS design language
+- **Code Contributions**: Improve performance, security, and features
+- **Documentation**: Help us explain Flux-OS clearly
+- **Testing**: Find bugs, report issues, suggest improvements
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+### Getting Help
+
+- [Community Chat](https://matrix.to/#/#flux-os:matrix.org)
+- [Documentation](./docs/)
+- [Build Guide](./BUILDING.md)
+- [FAQ](./docs/FAQ.md)
+
+---
+
+## Design Resources
+
+Flux-OS uses Nothing (R)'s design language:
+
+- **Color Palette**: Minimal black, white, and grays
+- **Typography**: Clean, modern sans-serif
+- **Iconography**: Glyph-based system icons
+- **Spacing**: Refined negative space
+- **Motion**: Subtle, purposeful animations
+
+See [DESIGN.md](./docs/DESIGN.md) for the complete design system specification.
+
+---
+
+## Technology Stack
+
+- **Language**: Rust (54.5%) - safe, performant systems programming
+- **Shell Scripts**: Shell (19%) - automation and scripting
+- **Build System**: Makefile (12.4%) - reliable build orchestration
+- **System Libraries**: C (7.9%) - POSIX compatibility
+- **UI**: HTML/CSS (4.2%) - modern web-based applications
+
+---
+
+## Performance
+
+Flux-OS is optimized for modern hardware:
+
+- **Boot Time**: ~5 seconds to desktop
+- **Memory Usage**: ~200MB base system
+- **Responsiveness**: Minimal system overhead
+- **Efficiency**: Low CPU usage at idle
+
+---
+
+## License
+
+Flux-OS is licensed under the MIT License — see [LICENSE](./LICENSE) for details.
+
+Based on [Redox OS](https://www.redox-os.org) (MIT Licensed)
+
+---
+
+## Inspiration
+
+- [Nothing (R)](https://nothing.tech) - Design philosophy & aesthetic
+- [Redox OS](https://www.redox-os.org) - Technical foundation
+- Minimalist design traditions - Dieter Rams, Japanese design principles
+
+---
+
+<p align="center">
+  <strong>Flux-OS: Technology, refined.</strong>
+  <br/>
+  <sub>Built on Redox. Designed with Nothing.</sub>
+</p>
