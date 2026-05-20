@@ -1,0 +1,81 @@
+[theme]
+name = "Flux-Nothing"
+author = "Flux-OS Design Team"
+version = "1.0.0"
+description = "Nothing (R) inspired minimalist theme for Orbital"
+
+[window]
+title_bar_height = 28
+title_bar_background = "#f5f5f5"
+title_text_color = "#000000"
+title_font = "Inter"
+title_font_size = 13
+border_color = "#e0e0e0"
+border_width = 1
+border_radius = 4
+shadow_blur = 8
+shadow_color = "rgba(0, 0, 0, 0.08)"
+
+[taskbar]
+height = 40
+background_color = "#f5f5f5"
+border_color = "#e0e0e0"
+border_width = 1
+icon_size = 24
+icon_spacing = 8
+padding = 8
+
+[button]
+resting_background = "transparent"
+hover_background = "#e8e8e8"
+active_background = "#d0d0d0"
+active_border = "#000000"
+active_border_width = 2
+hover_animation_duration = 100
+
+[text]
+default_font = "Inter"
+default_font_size = 13
+default_font_color = "#000000"
+secondary_font_color = "#808080"
+disabled_font_color = "#cccccc"
+
+[menu]
+background_color = "#ffffff"
+border_color = "#e0e0e0"
+border_width = 1
+shadow_blur = 8
+shadow_color = "rgba(0, 0, 0, 0.12)"
+item_padding = "12,16"
+item_height = 32
+separator_color = "#f0f0f0"
+
+[notification]
+background_color = "#ffffff"
+border_color = "#e0e0e0"
+border_width = 1
+shadow_blur = 8
+shadow_color = "rgba(0, 0, 0, 0.08)"
+text_color = "#000000"
+title_font = "Inter"
+title_font_size = 14
+body_font = "Inter"
+body_font_size = 12
+padding = "12,16"
+auto_dismiss_time = 4000
+animation_duration = 200
+
+[animation]
+window_open_duration = 200
+window_close_duration = 200
+menu_show_duration = 100
+hover_animation_duration = 100
+workspace_switch_duration = 300
+easing_function = "ease-in-out"
+
+[accessibility]
+focus_indicator_width = 2
+focus_indicator_color = "#000000"
+min_contrast_ratio = 4.5
+min_touch_target_size = 44
+respect_prefers_reduced_motion = true

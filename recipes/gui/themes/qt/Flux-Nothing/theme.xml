@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<theme name="Flux-Nothing" type="application">
+  <author>Flux-OS Design Team</author>
+  <license>MIT</license>
+  <email>design@flux-os.local</email>
+  <description>Nothing (R) inspired minimalist theme for Flux-OS</description>
+  <version>1.0</version>
+
+  <!-- Colors -->
+  <color name="black" value="#000000"/>
+  <color name="white" value="#FFFFFF"/>
+  <color name="dark-gray" value="#1a1a1a"/>
+  <color name="light-gray" value="#f5f5f5"/>
+  <color name="medium-gray" value="#808080"/>
+  <color name="accent-gray" value="#999999"/>
+  <color name="disabled" value="#cccccc"/>
+  <color name="border" value="#e0e0e0"/>
+
+  <!-- Fonts -->
+  <font name="system" family="Inter" size="14"/>
+  <font name="title" family="Inter" size="18" weight="normal"/>
+  <font name="small" family="Inter" size="12"/>
+  <font name="mono" family="JetBrains Mono" size="13"/>
+
+  <!-- Widget Defaults -->
+  <widget-default foreground="black" background="white" border="border"/>
+  <button foreground="black" background="light-gray" padding="8,16"/>
+  <entry background="white" border="border" padding="8,12"/>
+</theme>
