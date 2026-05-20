@@ -9,23 +9,23 @@ all: $(BUILD)/harddrive.img
 
 live:
 	-$(FUMOUNT) $(BUILD)/filesystem/ || true
-	-$(FUMOUNT) /tmp/redox_installer/ || true
-	rm -f $(BUILD)/redox-live.iso
-	$(MAKE) $(BUILD)/redox-live.iso
+	-$(FUMOUNT) /tmp/flux_installer/ || true
+	rm -f $(BUILD)/flux-live.iso
+	$(MAKE) $(BUILD)/flux-live.iso
 
-popsicle: $(BUILD)/redox-live.iso
-	popsicle-gtk $(BUILD)/redox-live.iso
+popsicle: $(BUILD)/flux-live.iso
+	popsicle-gtk $(BUILD)/flux-live.iso
 
 image:
 	-$(FUMOUNT) $(BUILD)/filesystem/ || true
-	-$(FUMOUNT) /tmp/redox_installer/ || true
-	rm -f $(BUILD)/harddrive.img $(BUILD)/redox-live.iso
+	-$(FUMOUNT) /tmp/flux_installer/ || true
+	rm -f $(BUILD)/harddrive.img $(BUILD)/flux-live.iso
 	$(MAKE) all
 
 rebuild:
 	-$(FUMOUNT) $(BUILD)/filesystem/ || true
-	-$(FUMOUNT) /tmp/redox_installer/ || true
-	rm -rf $(BUILD)/repo.tag $(BUILD)/harddrive.img $(BUILD)/redox-live.iso
+	-$(FUMOUNT) /tmp/flux_installer/ || true
+	rm -rf $(BUILD)/repo.tag $(BUILD)/harddrive.img $(BUILD)/flux-live.iso
 	$(MAKE) all
 
 # To tell that it's not safe
@@ -44,7 +44,7 @@ else
 ifneq ($(NOT_ON_PODMAN),1)
 	$(MAKE) repo_clean
 	-$(FUMOUNT) $(BUILD)/filesystem/ || true
-	-$(FUMOUNT) /tmp/redox_installer/ || true
+	-$(FUMOUNT) /tmp/flux_installer/ || true
 endif # NOT_ON_PODMAN
 	rm -rf repo
 	rm -rf $(BUILD) $(PREFIX)
